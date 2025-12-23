@@ -228,13 +228,13 @@ class DangerZoneVisualizer:
         cv2.rectangle(frame, top_left, bottom_right, (0, 0, 0), -1)
         cv2.rectangle(frame, top_left, bottom_right, color, 3)
         
-        # Text
-        font = cv2.FONT_HERSHEY_BOLD
-        text_size = cv2.getTextSize(text, font, 1.2, 2)[0]
+        # Text - use FONT_HERSHEY_SIMPLEX with thickness 3 for bold effect
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        text_size = cv2.getTextSize(text, font, 1.2, 3)[0]  # thickness=3 for bold
         text_x = top_left[0] + (box_width - text_size[0]) // 2
         text_y = top_left[1] + (box_height + text_size[1]) // 2
         
-        cv2.putText(frame, text, (text_x, text_y), font, 1.2, color, 2)
+        cv2.putText(frame, text, (text_x, text_y), font, 1.2, color, 3)  # thickness=3 for bold
         
         return frame
 
@@ -249,17 +249,28 @@ class VideoProcessor:
         print(f"Loading model from {model_path}")
         checkpoint = torch.load(model_path, map_location=device)
         
-        config = checkpoint.get('config', {})
+        # Handle different checkpoint formats
+        if isinstance(checkpoint, dict) and 'model_state_dict' in checkpoint:
+            # New format with metadata
+            config = checkpoint.get('config', {})
+            state_dict = checkpoint['model_state_dict']
+        else:
+            # Old format - just state dict
+            config = {}
+            state_dict = checkpoint
+        
+        # Create model with default config
         self.model = BladderSegmentationModel(
-            encoder_name=config.get('model', {}).get('encoder_name', 'efficientnet-b3'),
-            encoder_weights=None
+            encoder_name=config.get('encoder_name', 'efficientnet-b3'),
+            encoder_weights=None,
+            classes=config.get('classes', 1)
         )
         
-        self.model.load_state_dict(checkpoint['model_state_dict'])
+        self.model.load_state_dict(state_dict)
         self.model = self.model.to(device)
         self.model.eval()
         
-        print(f"✓ Model loaded")
+        print(f"✓ Model loaded on {device}")
         
         # Visualizer
         self.visualizer = DangerZoneVisualizer()
@@ -272,8 +283,14 @@ class VideoProcessor:
         """Preprocess frame"""
         frame_resized = cv2.resize(frame, (size, size))
         frame_norm = frame_resized.astype(np.float32) / 255.0
-        frame_norm = (frame_norm - [0.485, 0.456, 0.406]) / [0.229, 0.224, 0.225]
-        frame_tensor = torch.from_numpy(frame_norm.transpose(2, 0, 1)).unsqueeze(0)
+        
+        # Normalize with ImageNet stats (as float32 arrays)
+        mean = np.array([0.485, 0.456, 0.406], dtype=np.float32)
+        std = np.array([0.229, 0.224, 0.225], dtype=np.float32)
+        frame_norm = (frame_norm - mean) / std
+        
+        # Convert to tensor (float32)
+        frame_tensor = torch.from_numpy(frame_norm.transpose(2, 0, 1)).unsqueeze(0).float()
         return frame_tensor.to(self.device)
     
     def predict(self, frame):

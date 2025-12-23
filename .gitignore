@@ -1,0 +1,36 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environments
+venv/
+.venv/
+env/
+.env
+.envrc
+
+# OS files
+.DS_Store
+
+# Project artifacts and large data
+data/
+models/
+outputs/
+logs/
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.pt
+*.pth
+*.ckpt
+*.onnx
+*.npy
+*.npz
+
+# Editor / tooling
+.ipynb_checkpoints/
+*.backup
+

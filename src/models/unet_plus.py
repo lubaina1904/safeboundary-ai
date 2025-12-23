@@ -82,7 +82,7 @@ class BladderSegmentationModel(nn.Module):
         features = self.backbone.encoder(x)
         
         # Decoder
-        decoder_output = self.backbone.decoder(*features)
+        decoder_output = self.backbone.decoder(features)
         
         # Apply boundary attention
         attended_features, attention_map = self.boundary_attention(decoder_output)
