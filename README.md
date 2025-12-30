@@ -1,15 +1,38 @@
+<div align="center">
+  <img src="assets/images/banner.png" alt="SafeBoundary AI Banner" width="100%">
+</div>
+
 ## SafeBoundary AI
 
 Real-time bladder segmentation with multi-level danger-zone visualization, built on a U-Net++ backbone. The project includes training, evaluation, and inference utilities plus end-to-end automation for dataset creation and reporting.
 
-### Highlights
-- U-Net++ with boundary-aware losses for robust bladder masks.
-- Apple Silicon–friendly (MPS) with CUDA/CPU fallbacks.
-- Real-time video overlay: danger/caution/critical zones, FPS/BPE metrics, legend, and risk indicator.
-- One-click comparison videos and report-ready evaluation plots.
-- Scripts to download data, extract frames, annotate with SAM, train, and run inference.
+### 🎯 Highlights
+- **U-Net++ Architecture** with boundary-aware losses for robust bladder masks
+- **Cross-Platform Support**: Apple Silicon (MPS), CUDA, and CPU
+- **Real-time Visualization**: Multi-level danger zones with FPS/BPE metrics
+- **Complete Pipeline**: Automated workflow from data to deployment
+- **Professional Output**: Comparison videos and evaluation plots
 
-### Project Layout
+### 📊 Example Output
+
+<div align="center">
+  <img src="assets/images/example.png" alt="Example Output" width="90%">
+  <p><i>Left: Original surgical video | Right: AI-powered boundary detection with danger zones</i></p>
+</div>
+
+### 🏗️ Architecture
+
+<div align="center">
+  <img src="assets/images/architecture.png" alt="System Architecture" width="85%">
+</div>
+
+### 🔄 Complete Pipeline Workflow
+
+<div align="center">
+  <img src="assets/images/workflow.png" alt="Pipeline Workflow" width="95%">
+</div>
+
+### 📁 Project Layout
 - `scripts/run_complete_pipeline.sh` – full pipeline: download → extract → annotate → train → evaluate.
 - `src/data/` – dataset creation (`extract_frames.py`), PyTorch dataset/augmentations (`dataset.py`).
 - `src/models/` – U-Net++ (`unet_plus.py`), loss functions (`losses.py`).
@@ -19,7 +42,7 @@ Real-time bladder segmentation with multi-level danger-zone visualization, built
 - `src/utils/` – annotation tool (SAM-assisted), side-by-side `create_comparison.py`.
 - `outputs/` – generated videos/reports (ignored in git).
 
-### Setup
+### ⚙️ Setup
 Prereqs: Python 3.10+, ffmpeg, Git, and a PyTorch build for your device (MPS/CUDA/CPU).
 
 ```bash
@@ -31,7 +54,7 @@ pip install torch torchvision torchaudio --index-url https://download.pytorch.or
 pip install opencv-python albumentations scipy tqdm numpy matplotlib seaborn scikit-learn pyyaml
 ```
 
-### Data
+### 📦 Data
 - Training expects `data/annotations/images/*.jpg|png` with matching `data/annotations/masks/<name>_mask.png`.
 - Use `src/data/extract_frames.py` to sample frames from a video:
   ```bash
@@ -42,7 +65,7 @@ pip install opencv-python albumentations scipy tqdm numpy matplotlib seaborn sci
   python -m src.utils.annotation --frames data/frames --output data/annotations --sam_checkpoint models/sam/sam_vit_h_4b8939.pth --device mps
   ```
 
-### Train
+### 🚀 Train
 ```bash
 python -m src.training.train \
   --data_dir data/annotations \
@@ -54,7 +77,7 @@ python -m src.training.train \
 ```
 Checkpoints (including `best_model.pth`) land in `models/checkpoints/`.
 
-### Evaluate & Visualize
+### 📈 Evaluate & Visualize
 - Quick visual eval and Dice stats (saves to `outputs/evaluation/`):
   ```bash
   python -m src.evaluation.evaluate_model --model models/checkpoints/best_model.pth --data_dir data/annotations --num_samples 5 --device mps
@@ -68,7 +91,7 @@ Checkpoints (including `best_model.pth`) land in `models/checkpoints/`.
   python -m src.utils.create_comparison --original data/raw/surgery_video.mp4 --processed outputs/visualizations/demo_final.mp4 --output outputs/visualizations/comparison.mp4
   ```
 
-### Inference on Video
+### 🎥 Inference on Video
 ```bash
 python -m src.inference.video_processor \
   --video data/raw/surgery_video.mp4 \
@@ -79,14 +102,14 @@ python -m src.inference.video_processor \
 ```
 Produces an overlaid video with danger zones, boundary tracing, FPS, and risk indicator.
 
-### Full Pipeline (Optional)
+### 🔧 Full Pipeline (Optional)
 The helper script wires everything together (download → extract → annotate → train → eval):
 ```bash
 bash scripts/run_complete_pipeline.sh
 ```
 Review the script to adjust URLs, counts, and hyperparameters before running.
 
-### Notes
+### 📝 Notes
 - Large artifacts, videos, and checkpoints are git-ignored by default.
 - For best performance on Apple Silicon, use `--device mps`; otherwise choose `cuda` or `cpu`.
 - Keep outputs under `outputs/` and `models/` to avoid polluting git history.
